@@ -2,11 +2,12 @@
 FastAPI REST API Server for Surgical Video Phase Recognition.
 """
 from typing import Dict, Any, List
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from pydantic import BaseModel
 from .base import AuditLogger, PHIGuard
 from .models import SystemTaskPayload, ConsensusDossier
 from .supervisor import SystemSupervisor
+from .metrics import GLOBAL_METRICS
 
 supervisor = SystemSupervisor(model_provider="mock")
 
@@ -28,11 +29,25 @@ def health():
 
 @app.get("/metrics")
 def metrics():
-    return {
-        "dossiers_processed_total": len(supervisor.dossier_registry),
-        "audit_blocks_total": len(AuditLogger.get_trail()),
-        "system_status": "NOMINAL_OPTIMAL"
-    }
+    """Return Prometheus-compatible text exposition format."""
+    sys_lbl = "surgical-video-phase-recognition"
+    dossier_count = len(supervisor.dossier_registry)
+    audit_count = len(AuditLogger.get_trail())
+    lines = [
+        "# HELP dossiers_processed_total Total dossiers processed by the supervisor",
+        "# TYPE dossiers_processed_total counter",
+        f'dossiers_processed_total{{system="{sys_lbl}"}} {dossier_count}',
+        "",
+        "# HELP audit_blocks_total Total HMAC-SHA256 audit blocks signed",
+        "# TYPE audit_blocks_total counter",
+        f'audit_blocks_total{{system="{sys_lbl}"}} {audit_count}',
+        "",
+        "# HELP phi_outbound_blocks_total Total PHI outbound guard blocks",
+        "# TYPE phi_outbound_blocks_total counter",
+        f'phi_outbound_blocks_total{{system="{sys_lbl}"}} {GLOBAL_METRICS.phi_blocks_total}',
+        "",
+    ]
+    return Response(content="\n".join(lines) + "\n", media_type="text/plain")
 
 
 @app.post("/api/audit")

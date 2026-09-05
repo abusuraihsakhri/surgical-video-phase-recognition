@@ -28,11 +28,6 @@ class SecurityException(Exception):
     pass
 
 
-class ResourceLimitExceededException(Exception):
-    """Raised when computational parameters exceed safety bounds."""
-    pass
-
-
 def assert_no_phi(text: str) -> None:
     if not text:
         return
@@ -57,7 +52,17 @@ class PHIGuard:
 class AuditTrail:
     """Cryptographic Tamper-Evident HMAC-SHA256 Audit Trail."""
     def __init__(self, secret_key: Optional[str] = None):
-        self.secret_key = (secret_key or os.getenv("AUDIT_SECRET_KEY", "surgical-video-phase-recognition-master-audit-key-2026")).encode("utf-8")
+        resolved_key = secret_key or os.getenv("AUDIT_SECRET_KEY")
+        if not resolved_key:
+            import warnings
+            warnings.warn(
+                "AUDIT_SECRET_KEY not set. Using development-only fallback key. "
+                "Set AUDIT_SECRET_KEY environment variable in production.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+            resolved_key = "DEV-ONLY-KEY-SET-AUDIT_SECRET_KEY-IN-PROD-" + hashlib.sha256(b"surgical-video-phase-recognition-salt").hexdigest()[:16]
+        self.secret_key = resolved_key.encode("utf-8")
         self.logs: List[Dict[str, Any]] = []
 
     def log(self, actor: str, actor_tier: str, event_type: str, details: Dict[str, Any]) -> Dict[str, Any]:
@@ -108,11 +113,3 @@ class AuditLogger:
     @staticmethod
     def verify_integrity() -> bool:
         return GLOBAL_AUDIT.verify_integrity()
-
-
-class ActionExecutor:
-    @staticmethod
-    def execute_with_audit(actor: str, actor_tier: str, action_type: str, fn, *args, **kwargs):
-        res = fn(*args, **kwargs)
-        AuditLogger.log(actor, actor_tier, action_type, {"status": "SUCCESS"})
-        return res

@@ -18,7 +18,7 @@
 
 ## 📖 What It Does
 
-Surgical Video Phase Recognition
+Surgical Video Phase Recognition is an enterprise-grade analytical platform that evaluates task payloads across specialized worker agents to determine clinical urgency, safety interlocks, and protocol conformance. It provides cryptographic audit trails, PHI outbound protection, and multi-agent consensus scoring.
 
 ---
 
@@ -27,30 +27,44 @@ Surgical Video Phase Recognition
 - **Deterministic Calculation Engine**: Strict compliance with standard reference formulations and thresholds.
 - **Risk & Urgency Classification**: Multi-tier categorization with automated clinical/operational action recommendations.
 - **Validation & Guardrails**: Rigorous input bounds checking and anomaly detection.
+- **Multi-Agent Consensus**: Three specialized workers evaluate each payload (QC Invariant, Safety Escalation, Protocol Conformance).
 
 ---
 
 ## 💻 CLI Quickstart & Usage
 
-### 1. Guided Interactive Mode
+### 1. Single Task Evaluation (Audit)
 ```bash
-python cli.py
+python cli.py audit --task-id TASK-001 --target TARGET-01 --primary 28.5 --secondary 14.2 --status DISCORDANT --critical
 ```
 
-### 2. Direct Parameterized Evaluation
+### 2. Interactive Chat Query
 ```bash
-python cli.py --task-id <value> --target <value> --primary <value> --secondary <value>
+python cli.py chat "What is the system status?"
+```
+
+### 3. Batch CSV Processing
+```bash
+python cli.py batch -i sample.csv -o results.csv
+```
+
+### 4. Verify Audit Trail Integrity
+```bash
+python cli.py verify-audit
+```
+
+### 5. Launch REST API Server
+```bash
+python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
 ### Parameter Reference
-- `--task-id`: Specifies input measurement or parameter value.
-- `--target`: Specifies input measurement or parameter value.
-- `--primary`: Specifies input measurement or parameter value.
-- `--secondary`: Specifies input measurement or parameter value.
-- `--critical`: Specifies input measurement or parameter value.
-- `--status`: Specifies input measurement or parameter value.
-- `--input`: Specifies input measurement or parameter value.
-- `--output`: Specifies input measurement or parameter value.
+- `--task-id`: Unique task identifier (required)
+- `--target`: Target entity identifier (required)
+- `--primary`: Primary metric value (float, required)
+- `--secondary`: Secondary metric value (float, optional)
+- `--critical`: Emergency escalation flag (optional)
+- `--status`: Status descriptor string (optional)
 
 ### Input Data Schema
 
@@ -59,9 +73,9 @@ python cli.py --task-id <value> --target <value> --primary <value> --secondary <
 | `task_id` | Parameter / observation metric | Required |
 | `target_identifier` | Parameter / observation metric | Required |
 | `primary_metric` | Parameter / observation metric | Required |
-| `secondary_metric` | Parameter / observation metric | Required |
-| `is_critical_flag` | Parameter / observation metric | Required |
-| `status_descriptor` | Parameter / observation metric | Required |
+| `secondary_metric` | Parameter / observation metric | Optional |
+| `is_critical_flag` | Parameter / observation metric | Optional |
+| `status_descriptor` | Parameter / observation metric | Optional |
 
 ---
 
@@ -69,9 +83,16 @@ python cli.py --task-id <value> --target <value> --primary <value> --secondary <
 
 * **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
 * **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
-* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
 * **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
+
+### Security Configuration
+
+Set the `AUDIT_SECRET_KEY` environment environment variable before running in production:
+```bash
+export AUDIT_SECRET_KEY="your-secure-random-key-here"
+```
+
+Without this variable, a development-only fallback key is used with a runtime warning.
 
 ---
 
@@ -86,7 +107,7 @@ pytest -v
 Execute high-throughput batch simulation benchmarks:
 
 ```bash
-python simulator.py --tasks 1000 --concurrency 8
+python simulator.py 100
 ```
 
 ---
@@ -95,5 +116,44 @@ python simulator.py --tasks 1000 --concurrency 8
 
 ```bash
 docker build -t surgical-video-phase-recognition .
-docker run -p 8000:8000 surgical-video-phase-recognition
+docker run -p 8000:8000 -e AUDIT_SECRET_KEY="your-key-here" surgical-video-phase-recognition
+```
+
+Or with docker-compose (create a `.env` file with `AUDIT_SECRET_KEY`):
+
+```bash
+docker-compose up -d
+```
+
+---
+
+## 📁 Project Structure
+
+```
+surgical-video-phase-recognition/
+├── agents/                  # Core agent modules (workers, supervisor, API, models)
+│   ├── __init__.py
+│   ├── api.py              # FastAPI REST endpoints
+│   ├── base.py             # PHI guard, HMAC audit trail, security
+│   ├── learning.py         # Bayesian calibration engine
+│   ├── llm_factory.py      # LLM provider factory
+│   ├── metrics.py          # Prometheus metrics collector
+│   ├── models.py           # Pydantic schemas
+│   ├── streamer.py         # WebSocket telemetry broadcaster
+│   ├── supervisor.py       # Multi-agent orchestrator
+│   └── workers.py          # Specialized evaluation workers
+├── surgiphase_agent/        # Alternative agent implementation
+│   ├── agents.py           # Sub-agent implementations
+│   ├── cli.py              # Alternative CLI
+│   ├── engine.py           # Core domain engine
+│   ├── models.py           # Data models
+│   └── server.py           # FastAPI server factory
+├── tests/                   # Pytest test suite
+├── web/index.html           # Operations console UI
+├── cli.py                   # Main CLI entry point
+├── simulator.py             # High-throughput simulation
+├── enrichment.py            # Enrichment feature engines
+├── pyproject.toml           # Project metadata & dependencies
+├── Dockerfile               # Container image definition
+└── docker-compose.yml       # Container orchestration
 ```
