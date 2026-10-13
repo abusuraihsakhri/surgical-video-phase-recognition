@@ -1,10 +1,13 @@
 """
 FastAPI REST API Server for Surgical Video Phase Recognition.
 """
-from typing import Dict, Any, List
-from fastapi import FastAPI, HTTPException, Response
-from pydantic import BaseModel
-from .base import AuditLogger, PHIGuard
+import os
+import secrets
+from pathlib import Path
+from fastapi import FastAPI, Header, HTTPException, Response
+from fastapi.responses import FileResponse
+from pydantic import BaseModel, Field
+from .base import AuditLogger, PHIGuard, SecurityException
 from .models import SystemTaskPayload, ConsensusDossier
 from .supervisor import SystemSupervisor
 from .metrics import GLOBAL_METRICS
@@ -19,7 +22,12 @@ app = FastAPI(
 
 
 class ChatRequest(BaseModel):
-    query: str
+    query: str = Field(min_length=1, max_length=2048)
+
+
+@app.get("/", include_in_schema=False)
+def console():
+    return FileResponse(Path(__file__).resolve().parent.parent / "web" / "index.html")
 
 
 @app.get("/health")
@@ -52,7 +60,10 @@ def metrics():
 
 @app.post("/api/audit")
 def api_audit(payload: SystemTaskPayload):
-    dossier = supervisor.process_task(payload)
+    try:
+        dossier = supervisor.process_task(payload)
+    except SecurityException:
+        raise HTTPException(status_code=400, detail="Identifier contains a prohibited data pattern") from None
     return dossier.to_dict()
 
 
@@ -61,10 +72,14 @@ def api_chat(req: ChatRequest):
     try:
         ans = supervisor.query_supervisory_chat(req.query)
         return {"response": ans}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except SecurityException:
+        raise HTTPException(status_code=400, detail="Query contains a prohibited data pattern") from None
 
 
 @app.get("/api/audit/logs")
-def api_audit_logs():
+def api_audit_logs(authorization: str | None = Header(default=None)):
+    """Audit metadata is available only when an explicit access token is configured."""
+    token = os.getenv("AUDIT_LOGS_TOKEN")
+    if not token or not authorization or not secrets.compare_digest(authorization, f"Bearer {token}"):
+        raise HTTPException(status_code=403, detail="Audit log access disabled or unauthorized")
     return {"audit_trail": AuditLogger.get_trail(), "verified": AuditLogger.verify_integrity()}

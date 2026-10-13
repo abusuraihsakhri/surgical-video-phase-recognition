@@ -1,159 +1,87 @@
 # Surgical Video Phase Recognition
 
-> **Domain:** Clinical Decision Support & Biomedical Computing  
-> **Reference Guidelines & Standards:** `Standard Clinical Formulations & ISO/IEC Quality Frameworks`
+**Status: deterministic task-evaluation prototype, not a surgical video recognition model.**
 
-<div align="center">
+This repository evaluates numeric task payloads using threshold and descriptor rules. Despite the repository name, it **does not** process video, classify operative phases, track instruments, or contain a trained model. Its thresholds are illustrative software defaults, not validated clinical decision limits.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+## Browser application
 
-</div>
+The `web/index.html` console runs locally in the browser without installing Python. It reproduces the three rule checks, reports results as an **unsigned demonstration**, and exports JSON. It does not upload data, use browser storage, or generate fabricated audit signatures. The `Local FastAPI service` option posts to a same-origin Python API when the backend is running.
 
----
+To open the browser console from a local checkout, open `web/index.html` in a modern browser. GitHub Pages may serve the same console through the repository homepage if Pages is enabled.
 
-## 📖 What It Does
+**Do not enter patient-identifiable data. Not for clinical decisions.**
 
-Surgical Video Phase Recognition is an enterprise-grade analytical platform that evaluates task payloads across specialized worker agents to determine clinical urgency, safety interlocks, and protocol conformance. It provides cryptographic audit trails, PHI outbound protection, and multi-agent consensus scoring.
+## Python installation
 
----
+Python 3.10 or later:
 
-## ⚙️ Key Capabilities & Algorithmic Modules
+```bash
+python -m pip install -e ".[dev]"
+python -m pytest -q
+```
 
-- **Deterministic Calculation Engine**: Strict compliance with standard reference formulations and thresholds.
-- **Risk & Urgency Classification**: Multi-tier categorization with automated clinical/operational action recommendations.
-- **Validation & Guardrails**: Rigorous input bounds checking and anomaly detection.
-- **Multi-Agent Consensus**: Three specialized workers evaluate each payload (QC Invariant, Safety Escalation, Protocol Conformance).
+## Usage
 
----
+Single task:
 
-## 💻 CLI Quickstart & Usage
-
-### 1. Single Task Evaluation (Audit)
 ```bash
 python cli.py audit --task-id TASK-001 --target TARGET-01 --primary 28.5 --secondary 14.2 --status DISCORDANT --critical
 ```
 
-### 2. Interactive Chat Query
-```bash
-python cli.py chat "What is the system status?"
-```
+Batch CSV (accepts `true/false`, `1/0`, `yes/no` in `is_critical_flag`):
 
-### 3. Batch CSV Processing
 ```bash
 python cli.py batch -i sample.csv -o results.csv
 ```
 
-### 4. Verify Audit Trail Integrity
+Alternative installed command-line interface:
+
 ```bash
-python cli.py verify-audit
+surgical-video-phase-recognition audit
 ```
 
-### 5. Launch REST API Server
+Start the API and open <http://127.0.0.1:8000/>:
+
 ```bash
+export AUDIT_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
 python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
-### Parameter Reference
-- `--task-id`: Unique task identifier (required)
-- `--target`: Target entity identifier (required)
-- `--primary`: Primary metric value (float, required)
-- `--secondary`: Secondary metric value (float, optional)
-- `--critical`: Emergency escalation flag (optional)
-- `--status`: Status descriptor string (optional)
+Endpoints: `GET /` (console), `GET /health`, `GET /metrics`, `POST /api/audit`, `POST /api/chat`, and `GET /api/audit/logs`.
 
-### Input Data Schema
+The audit log endpoint requires an `AUDIT_LOGS_TOKEN` environment variable and an `Authorization: Bearer <token>` request header; without a configured token it responds with HTTP 403. `/api/chat` uses a deterministic placeholder, **not** an integrated language model.
 
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `task_id` | Parameter / observation metric | Required |
-| `target_identifier` | Parameter / observation metric | Required |
-| `primary_metric` | Parameter / observation metric | Required |
-| `secondary_metric` | Parameter / observation metric | Optional |
-| `is_critical_flag` | Parameter / observation metric | Optional |
-| `status_descriptor` | Parameter / observation metric | Optional |
+## Rule semantics
 
----
+| Input | Condition | Outcome |
+| --- | --- | --- |
+| `primary_metric` | `> 25` | Elevated alert |
+| `secondary_metric` | `> 12` | Elevated alert |
+| `is_critical_flag` | True | Critical alert |
+| `status_descriptor` | Contains DISCORDANT, ANOMALY, MUTANT, VIOLATION, FAIL, or REJECT | Elevated alert |
 
-## 🛡️ Security & Enterprise Architecture
+Critical alerts take precedence over elevated alerts. The browser reproduces these rules without cryptographic signing; server-side audit records are HMAC-chained in memory using `AUDIT_SECRET_KEY`. Chain verification recomputes each record's HMAC. The log is not persistent and these controls do **not** establish HIPAA compliance or comprehensive de-identification.
 
-* **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
+## Security and deployment
 
-### Security Configuration
+Avoid uploading clinical records or identifiers: the server implements only heuristic identifier-pattern blocking, not comprehensive PHI detection. The API does not have general authentication or rate limiting; bind it to a trusted local interface or secure it behind a gateway before exposing it.
 
-Set the `AUDIT_SECRET_KEY` environment environment variable before running in production:
-```bash
-export AUDIT_SECRET_KEY="your-secure-random-key-here"
-```
-
-Without this variable, a development-only fallback key is used with a runtime warning.
-
----
-
-## 🧪 Testing & Verification
-
-Run the automated test suite:
-
-```bash
-pytest -v
-```
-
-Execute high-throughput batch simulation benchmarks:
-
-```bash
-python simulator.py 100
-```
-
----
-
-## 🐳 Container Deployment
+To run Docker:
 
 ```bash
 docker build -t surgical-video-phase-recognition .
-docker run -p 8000:8000 -e AUDIT_SECRET_KEY="your-key-here" surgical-video-phase-recognition
+docker run --rm -p 127.0.0.1:8000:8000 -e AUDIT_SECRET_KEY="replace-with-unique-random-key" surgical-video-phase-recognition
 ```
 
-Or with docker-compose (create a `.env` file with `AUDIT_SECRET_KEY`):
+For Compose, copy `.env.example` to `.env`, set a unique `AUDIT_SECRET_KEY`, then run `docker compose up --build`.
 
-```bash
-docker-compose up -d
-```
+## Development and verification
 
----
+CI installs the package, checks Python compilation and dependencies, verifies browser-script syntax, and runs the pytest suite on Python 3.10–3.12. Tests cover core rule evaluation, the legacy CLI, HMAC tampering, boolean CSV parsing, API validation, and access controls.
 
-## 📁 Project Structure
+Technology: Python, FastAPI, Pydantic, JavaScript, HTML/CSS. No WebAssembly or Pyodide is required because the browser demonstration reimplements the small deterministic rule set directly in JavaScript. The Python API and in-memory HMAC audit cannot run on GitHub Pages.
 
-```
-surgical-video-phase-recognition/
-├── agents/                  # Core agent modules (workers, supervisor, API, models)
-│   ├── __init__.py
-│   ├── api.py              # FastAPI REST endpoints
-│   ├── base.py             # PHI guard, HMAC audit trail, security
-│   ├── learning.py         # Bayesian calibration engine
-│   ├── llm_factory.py      # LLM provider factory
-│   ├── metrics.py          # Prometheus metrics collector
-│   ├── models.py           # Pydantic schemas
-│   ├── streamer.py         # WebSocket telemetry broadcaster
-│   ├── supervisor.py       # Multi-agent orchestrator
-│   └── workers.py          # Specialized evaluation workers
-├── surgiphase_agent/        # Alternative agent implementation
-│   ├── agents.py           # Sub-agent implementations
-│   ├── cli.py              # Alternative CLI
-│   ├── engine.py           # Core domain engine
-│   ├── models.py           # Data models
-│   └── server.py           # FastAPI server factory
-├── tests/                   # Pytest test suite
-├── web/index.html           # Operations console UI
-├── cli.py                   # Main CLI entry point
-├── simulator.py             # High-throughput simulation
-├── enrichment.py            # Enrichment feature engines
-├── pyproject.toml           # Project metadata & dependencies
-├── Dockerfile               # Container image definition
-└── docker-compose.yml       # Container orchestration
-```
+## License
+
+MIT — see [LICENSE](LICENSE).

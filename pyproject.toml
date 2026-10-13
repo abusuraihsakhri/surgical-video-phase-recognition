@@ -1,27 +1,36 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "surgical-video-phase-recognition"
-version = "2.0.0"
-description = "SurgiPhase-AI: Laparoscopic Video Action & Tool Segmentation Engine"
+version = "2.0.1"
+description = "Deterministic task-payload evaluation and audit prototype (no video inference)"
 readme = "README.md"
-authors = [{ name = "Dr. Abu Suraih Sakhri", email = "abusuraih@example.com" }]
-license = { text = "MIT" }
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Dr. Abu Suraih Sakhri"}]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-    "Topic :: Security/Cryptography",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Testing",
 ]
-requires-python = ">=3.9"
-dependencies = []
+dependencies = [
+    "pydantic>=2.5,<3",
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.30,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<10", "httpx>=0.27,<1"]
 
 [project.scripts]
 surgical-video-phase-recognition = "surgiphase_agent.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/abusuraihsakhri/surgical-video-phase-recognition"
-Repository = "https://github.com/abusuraihsakhri/surgical-video-phase-recognition.git"
+Repository = "https://github.com/abusuraihsakhri/surgical-video-phase-recognition"
+
+[tool.setuptools]
+packages = ["agents", "surgiphase_agent"]
+py-modules = ["cli", "enrichment", "simulator", "surgiphase_agent_app"]

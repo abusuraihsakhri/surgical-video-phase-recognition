@@ -1,236 +1,213 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Surgical Video Phase Recognition — Operations Console</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg: #090d16;
-            --card: #111827;
-            --border: #1f293d;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.25);
-            --text: #f3f4f6;
-            --text-muted: #9ca3af;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding: 2rem;
-            min-height: 100vh;
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .header-title h1 { font-size: 1.6rem; font-weight: 700; color: #fff; }
-        .header-title p { color: var(--text-muted); font-size: 0.9rem; margin-top: 0.25rem; }
-        .badge {
-            display: inline-block;
-            padding: 0.3rem 0.8rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            background: var(--accent-glow);
-            color: var(--accent);
-            border: 1px solid var(--accent);
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 1.5rem;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-        }
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.4rem; }
-        input, select, textarea {
-            width: 100%;
-            padding: 0.65rem 0.9rem;
-            background: #0d1322;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: #fff;
-            font-family: inherit;
-            font-size: 0.9rem;
-        }
-        input:focus, textarea:focus { outline: none; border-color: var(--accent); }
-        .btn {
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            padding: 0.7rem 1.4rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-        }
-        .btn:hover { background: #2563eb; }
-        .terminal {
-            background: #060911;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            color: #10b981;
-            height: 380px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        .metrics-bar {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .metric-box {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-        }
-        .metric-val { font-size: 1.4rem; font-weight: 700; color: #fff; margin-top: 0.25rem; }
-        .metric-label { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Surgical Video Phase Recognition — Evaluation Sandbox</title>
+  <style>
+    :root { color-scheme: dark; font: 16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:#0b1220; color:#e8edf5; }
+    * { box-sizing: border-box; }
+    body { margin:0; }
+    main { width:min(1120px,calc(100% - 2rem)); margin:2rem auto 4rem; }
+    h1 { font-size:clamp(1.55rem,3vw,2.15rem); line-height:1.2; margin:.35rem 0; }
+    h2 { font-size:1.13rem; margin:0 0 1rem; }
+    p { margin:.4rem 0; }
+    a { color:#9cbefe; }
+    .eyebrow { color:#91b6ff; text-transform:uppercase; letter-spacing:.12em; font-weight:700; font-size:.74rem; }
+    .subtitle { color:#aab7ca; max-width:750px; }
+    .notice { border:1px solid #876a31; background:#282315; color:#f4dea8; border-radius:10px; padding:.85rem 1rem; margin:1.25rem 0 1.5rem; }
+    .layout { display:grid; grid-template-columns:minmax(0, .95fr) minmax(0,1.05fr); gap:1rem; }
+    .panel { background:#121e30; border:1px solid #304058; border-radius:14px; padding:1.3rem; min-width:0; }
+    .fields { display:grid; gap:.8rem; }
+    .two { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; }
+    label { display:block; font-size:.85rem; font-weight:600; margin-bottom:.3rem; color:#c2cee0; }
+    input:not([type="checkbox"]), select { width:100%; border:1px solid #52657e; background:#0a1423; color:#f5f8fc; border-radius:7px; padding:.68rem .75rem; font:inherit; }
+    input:focus-visible, select:focus-visible, button:focus-visible { outline:3px solid #9abcf6; outline-offset:2px; }
+    .checkbox { display:flex; align-items:center; gap:.6rem; }
+    .checkbox input { width:1.15rem; height:1.15rem; accent-color:#75a7ef; }
+    .checkbox label { margin:0; }
+    .help { color:#aab7ca; font-size:.8rem; }
+    .actions { display:flex; flex-wrap:wrap; gap:.6rem; margin-top:.45rem; }
+    button { border-radius:8px; font:inherit; font-weight:650; cursor:pointer; padding:.65rem 1rem; border:1px solid #597396; background:#17263b; color:#e9f2ff; }
+    button.primary { border-color:#6ea3fc; background:#2864ac; color:white; }
+    button:hover:not(:disabled) { filter:brightness(1.13); }
+    button:disabled { cursor:not-allowed; opacity:.5; }
+    .status { color:#b5c6da; min-height:1.45rem; font-size:.88rem; margin-bottom:.65rem; }
+    pre { white-space:pre-wrap; overflow-wrap:anywhere; background:#07111e; border:1px solid #304058; border-radius:9px; padding:1rem; min-height:320px; max-height:610px; overflow:auto; font: .81rem/1.65 ui-monospace,SFMono-Regular,Consolas,monospace; margin:0; }
+    .summary { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.6rem; margin-bottom:1rem; }
+    .summary div { background:#091626; border-radius:7px; padding:.7rem; border:1px solid #31425a; }
+    .summary strong { display:block; font-size:1.15rem; }
+    .summary span { font-size:.74rem; color:#afbed1; }
+    footer { color:#aab7ca; font-size:.82rem; margin-top:1.4rem; }
+    @media(max-width:760px) { .layout { grid-template-columns:1fr; } main { margin:1.25rem auto; } }
+    @media(max-width:420px) { .two { grid-template-columns:1fr; } .summary { grid-template-columns:1fr 1fr 1fr; } .panel { padding:1rem; } }
+  </style>
 </head>
 <body>
+<main>
+  <header>
+    <div class="eyebrow">Deterministic evaluation sandbox</div>
+    <h1>Surgical Video Phase Recognition</h1>
+    <p class="subtitle">Explore the repository's existing three-rule task evaluator in a browser or submit the same payload to a locally hosted FastAPI service.</p>
+  </header>
+  <div class="notice"><strong>Scope:</strong> This prototype does not read video, detect surgical instruments, classify operative phases, or provide clinical decision support. Do not enter patient-identifiable information.</div>
+  <div class="layout">
+    <section class="panel" aria-labelledby="input-heading">
+      <h2 id="input-heading">Task evaluation</h2>
+      <form id="evaluation-form">
+        <div class="fields">
+          <div>
+            <label for="execution-mode">Execution mode</label>
+            <select id="execution-mode"><option value="browser">Browser-only demonstration</option><option value="api">Local FastAPI service (same origin)</option></select>
+            <p class="help">Browser mode never transmits input data. API mode sends the payload to this site's /api/audit endpoint.</p>
+          </div>
+          <div class="two">
+            <div><label for="task-id">Task identifier</label><input id="task-id" value="TASK-DEMO-001" maxlength="128" required></div>
+            <div><label for="target-id">Target identifier</label><input id="target-id" value="TARGET-DEMO-01" maxlength="128" required></div>
+          </div>
+          <div class="two">
+            <div><label for="primary">Primary metric</label><input id="primary" type="number" step="any" required value="29.4"></div>
+            <div><label for="secondary">Secondary metric</label><input id="secondary" type="number" step="any" required value="14.8"></div>
+          </div>
+          <div><label for="descriptor">Status descriptor</label><input id="descriptor" maxlength="64" required value="DISCORDANT_ANOMALY"></div>
+          <div class="checkbox"><input id="critical" type="checkbox" checked><label for="critical">Critical flag</label></div>
+          <p class="help">Rules: primary &gt; 25 (elevated), secondary &gt; 12 (elevated), critical flag (critical), or anomaly keywords (elevated). These are software demo thresholds, not validated clinical limits.</p>
+        </div>
+        <div class="actions"><button class="primary" type="submit" id="run">Evaluate task</button><button type="reset">Reset</button></div>
+      </form>
+    </section>
+    <section class="panel" aria-labelledby="result-heading">
+      <h2 id="result-heading">Evaluation result</h2>
+      <div class="summary">
+        <div><strong id="tasks">0</strong><span>Tasks evaluated</span></div>
+        <div><strong id="alerts">0</strong><span>Latest alerts</span></div>
+        <div><strong id="mode">—</strong><span>Latest mode</span></div>
+      </div>
+      <p class="status" id="status" role="status" aria-live="polite">Ready. No task has been evaluated.</p>
+      <pre id="result" aria-label="Structured evaluation result">Submit the form to view the evaluation.</pre>
+      <div class="actions"><button type="button" id="download" disabled>Download result JSON</button></div>
+    </section>
+  </div>
+  <footer>Inputs and results remain in memory in browser mode; no cookies or local storage are used. Server mode is intended for a locally hosted API, not public clinical use. Source: <a href="https://github.com/abusuraihsakhri/surgical-video-phase-recognition">GitHub repository</a>.</footer>
+</main>
+<script>
+(() => {
+  "use strict";
+  const byId = (id) => document.getElementById(id);
+  const form = byId("evaluation-form");
+  const resultElement = byId("result");
+  const statusElement = byId("status");
+  const downloadButton = byId("download");
+  let lastResult = null;
+  let count = 0;
 
-    <div class="header">
-        <div class="header-title">
-            <h1>Surgical Video Phase Recognition</h1>
-            <p>Domain: Clinical & Cryptographic AI | Standard: CAP / CLSI / NIST Standards | LabMind-Atlas Architecture</p>
-        </div>
-        <div>
-            <span class="badge">Air-Gapped Active</span>
-            <span class="badge" style="background: rgba(16,185,129,0.2); color: #10b981; border-color: #10b981;">Zero-PHI Guard Active</span>
-        </div>
-    </div>
+  // GitHub Pages serves static files only and cannot run the Python API.
+  if (location.hostname.endsWith(".github.io")) {
+    byId("execution-mode").querySelector('option[value="api"]').disabled = true;
+  }
 
-    <div class="metrics-bar">
-        <div class="metric-box">
-            <div class="metric-label">System Status</div>
-            <div class="metric-val" style="color: var(--success);" id="m-status">OPTIMAL</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Tasks Processed</div>
-            <div class="metric-val" id="m-tasks">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">Audit Blocks Signed</div>
-            <div class="metric-val" id="m-audit">142</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-label">PHI Interceptions</div>
-            <div class="metric-val" style="color: var(--accent);" id="m-phi">0</div>
-        </div>
-    </div>
+  function payloadFromForm() {
+    const taskId = byId("task-id").value.trim();
+    const targetId = byId("target-id").value.trim();
+    const descriptor = byId("descriptor").value.trim();
+    const primary = Number(byId("primary").value);
+    const secondary = Number(byId("secondary").value);
+    if (!taskId || !targetId || !descriptor || !Number.isFinite(primary) || !Number.isFinite(secondary)) {
+      throw new Error("Complete all fields using finite numeric values and nonempty identifiers.");
+    }
+    return {
+      task_id: taskId, target_identifier: targetId, primary_metric: primary,
+      secondary_metric: secondary, status_descriptor: descriptor,
+      is_critical_flag: byId("critical").checked
+    };
+  }
 
-    <div class="grid">
-        <div class="card">
-            <h2>⚙️ Dispatch Distributed Component Audit</h2>
-            <div class="form-group">
-                <label>Task / Sample ID</label>
-                <input type="text" id="task_id" value="TASK-2026-LIVE-01">
-            </div>
-            <div class="form-group">
-                <label>Target Identifier</label>
-                <input type="text" id="target_id" value="SPECIMEN-ALPHA-77">
-            </div>
-            <div class="form-group">
-                <label>Primary Measurement / Value</label>
-                <input type="number" id="primary_metric" value="29.4" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Secondary Metric / Kinetic Index</label>
-                <input type="number" id="secondary_metric" value="14.8" step="0.1">
-            </div>
-            <div class="form-group">
-                <label>Status / Phenotype Descriptor</label>
-                <input type="text" id="status_descriptor" value="DISCORDANT_ANOMALY">
-            </div>
-            <div class="form-group">
-                <label><input type="checkbox" id="is_critical" checked> Trigger Emergency / Critical Flag</label>
-            </div>
-            <button class="btn" onclick="runAudit()">Execute Distributed Component Audit</button>
-        </div>
+  function localEvaluation(payload) {
+    const alerts = [];
+    const add = (origin_worker, urgency, summary) => alerts.push({origin_worker, urgency, summary});
+    if (payload.primary_metric > 25) add("InvariantQCWorker", "ELEVATED_RISK", "Primary Metric Threshold Exceeded");
+    if (payload.is_critical_flag || payload.secondary_metric > 12) {
+      add("SafetyEscalationWorker", payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK", "Critical Safety Interlock Triggered");
+    }
+    if (["DISCORDANT", "ANOMALY", "MUTANT", "VIOLATION", "FAIL", "REJECT"].some((word) => payload.status_descriptor.toUpperCase().includes(word))) {
+      add("ProtocolConformanceWorker", "ELEVATED_RISK", "Protocol Conformance Discordance Detected");
+    }
+    const criticalCount = alerts.filter((item) => item.urgency === "CRITICAL_STAT_PANIC").length;
+    const urgency = criticalCount ? "CRITICAL_STAT_PANIC" : alerts.length ? "ELEVATED_RISK" : "ROUTINE";
+    return {
+      evaluation_mode: "BROWSER_DEMO_ONLY",
+      note: "Local reproduction of rule thresholds. No video inference, HMAC signing, or clinical validation.",
+      task_id: payload.task_id,
+      target_identifier: payload.target_identifier,
+      overall_urgency: urgency,
+      integrity_status: criticalCount ? "RECALIBRATION_REQUIRED" : alerts.length ? "DISCORDANT_ANOMALY" : "VALIDATED_OPTIMAL",
+      total_alerts: alerts.length,
+      critical_alerts_count: criticalCount,
+      alerts,
+      audit_hash: null
+    };
+  }
 
-        <div class="card">
-            <h2>📊 Real-Time Consensus Dossier & Audit Log</h2>
-            <div class="terminal" id="outputConsole">// Surgical Video Phase Recognition Operations Console Ready
-// Connection established with Air-Gapped Supervisor
-// Cryptographic HMAC-SHA256 audit ledger loaded.
-// Ready for live task payload dispatch...</div>
-        </div>
-    </div>
-
-    <script>
-        async function runAudit() {
-            const consoleEl = document.getElementById('outputConsole');
-            consoleEl.innerText = "// Dispatching task across specialized workers...
-// Invoking InvariantQCWorker, SafetyEscalationWorker, ProtocolWorker...";
-
-            const payload = {
-                task_id: document.getElementById('task_id').value,
-                target_identifier: document.getElementById('target_id').value,
-                primary_metric: parseFloat(document.getElementById('primary_metric').value),
-                secondary_metric: parseFloat(document.getElementById('secondary_metric').value),
-                status_descriptor: document.getElementById('status_descriptor').value,
-                is_critical_flag: document.getElementById('is_critical').checked
-            };
-
-            try {
-                const res = await fetch('/api/audit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const data = await res.json();
-                consoleEl.innerText = JSON.stringify(data, null, 2);
-                document.getElementById('m-tasks').innerText = parseInt(document.getElementById('m-tasks').innerText) + 1;
-                document.getElementById('m-audit').innerText = parseInt(document.getElementById('m-audit').innerText) + 1;
-            } catch (err) {
-                consoleEl.innerText = "// Offline / Simulation Output:\n" + JSON.stringify({
-                    dossier_id: "DOSSIER-SIM-" + Math.floor(Math.random()*10000),
-                    system: "surgical-video-phase-recognition",
-                    domain: "Clinical & Cryptographic AI",
-                    task_id: payload.task_id,
-                    overall_urgency: payload.is_critical_flag ? "CRITICAL_STAT_PANIC" : "ELEVATED_RISK",
-                    integrity_status: "DISCORDANT_ANOMALY",
-                    alerts: [
-                        { worker: "InvariantQCWorker", alert: "Primary metric exceeds upper reference bound" },
-                        { worker: "SafetyEscalationWorker", alert: "Critical emergency interlock flag active" }
-                    ],
-                    audit_hash: "HMAC_SHA256_e83f9a72b941d6c381f9"
-                }, null, 2);
-            }
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    const runButton = byId("run");
+    runButton.disabled = true;
+    statusElement.textContent = "Evaluating...";
+    try {
+      const payload = payloadFromForm();
+      const isApi = byId("execution-mode").value === "api";
+      let output;
+      if (isApi) {
+        const response = await fetch("/api/audit", {
+          method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload)
+        });
+        if (!response.ok) {
+          throw new Error("API returned HTTP " + response.status + ". Check the service and input data.");
         }
-    </script>
+        output = await response.json();
+      } else {
+        output = localEvaluation(payload);
+      }
+      lastResult = output;
+      count += 1;
+      byId("tasks").textContent = String(count);
+      byId("alerts").textContent = String(output.total_alerts);
+      byId("mode").textContent = isApi ? "API" : "Local";
+      resultElement.textContent = JSON.stringify(output, null, 2);
+      statusElement.textContent = "Evaluation complete (" + (isApi ? "server API" : "browser-only demonstration") + ").";
+      downloadButton.disabled = false;
+    } catch (error) {
+      statusElement.textContent = "Evaluation failed: " + (error instanceof Error ? error.message : String(error));
+    } finally {
+      runButton.disabled = false;
+    }
+  });
+
+  form.addEventListener("reset", () => {
+    lastResult = null;
+    downloadButton.disabled = true;
+    resultElement.textContent = "Submit the form to view the evaluation.";
+    statusElement.textContent = "Form reset. Previous result cleared.";
+    byId("alerts").textContent = "0";
+    byId("mode").textContent = "—";
+  });
+
+  downloadButton.addEventListener("click", () => {
+    if (!lastResult) return;
+    const blob = new Blob([JSON.stringify(lastResult, null, 2) + "\n"], {type:"application/json"});
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = "evaluation-result.json";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(href), 1000);
+  });
+})();
+</script>
 </body>
 </html>
