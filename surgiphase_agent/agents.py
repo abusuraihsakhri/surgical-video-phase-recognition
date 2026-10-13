@@ -85,7 +85,7 @@ class SurgiPhaseCoordinator:
 
         dossier = {
             "system": "surgical-video-phase-recognition",
-            "domain": "Surgical AI",
+            "domain": "rule-based demo",
             "task_id": payload.task_id,
             "target_identifier": payload.target_identifier,
             "overall_status": status.value,
@@ -93,7 +93,7 @@ class SurgiPhaseCoordinator:
             "critical_count": crit_count,
             "warning_count": warn_count,
             "alerts": [a.to_dict() for a in all_alerts],
-            "standard_specification": "Cholec80 / EndoVis Surgical AI Standards",
+            "standard_specification": "demonstration rules (not clinical standards)",
             "consensus_summary": f"Consensus evaluation completed across 3 sub-agents with status [{status.value}].",
         }
 
@@ -105,6 +105,6 @@ class SurgiPhaseCoordinator:
         if "status" in q or "ledger" in q:
             return f"SurgiPhase-AI: Laparoscopic Video Action & Tool Segmentation Agent currently managing {len(self.execution_ledger)} execution tasks in air-gapped memory."
         elif "standard" in q or "spec" in q:
-            return "Active runtime operating strictly according to Cholec80 / EndoVis Surgical AI Standards specifications."
+            return "This demo does not implement Cholec80 / EndoVis video inference or validated surgical standards."
         else:
-            return f"SurgiPhase-AI: Laparoscopic Video Action & Tool Segmentation Agent executive coordinator online. Zero-telemetry on-premises surveillance active."
+            return f"SurgiPhase-AI: Laparoscopic Video Action & Tool Segmentation Agent executive coordinator online. No video processing or instrument tracking is implemented."

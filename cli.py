@@ -9,6 +9,18 @@ from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor
 from agents.base import AuditLogger
 
+
+def parse_csv_bool(value):
+    """Parse an explicit CSV boolean instead of relying on nonempty-string truthiness."""
+    if isinstance(value, bool):
+        return value
+    normalized = str(value or "").strip().lower()
+    if normalized in {"true", "1", "yes", "y", "on"}:
+        return True
+    if normalized in {"false", "0", "no", "n", "off", ""}:
+        return False
+    raise ValueError(f"Invalid is_critical_flag value: {value!r}")
+
 supervisor = SystemSupervisor(model_provider="mock")
 
 
@@ -94,7 +106,7 @@ def main(argv=None):
                 primary_metric=float(r.get("primary_metric", 15.0)),
                 secondary_metric=float(r.get("secondary_metric", 5.0)),
                 status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=bool(r.get("is_critical_flag", False)),
+                is_critical_flag=parse_csv_bool(r.get("is_critical_flag", False)),
             )
             dossier = supervisor.process_task(payload)
             row_dict = dict(r)

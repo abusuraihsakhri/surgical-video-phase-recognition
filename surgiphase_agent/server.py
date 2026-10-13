@@ -15,8 +15,8 @@ def create_app():
 
         app = FastAPI(
             title="SurgiPhase-AI: Laparoscopic Video Action & Tool Segmentation Agent",
-            description="Analyzes surgical video frames, classifying operative phases (e.g. Calot's triangle dissection) and tracking instrument tool tips.",
-            version="2.0.0-FRONTIER",
+            description="Illustrative rule-based payload evaluation. No video processing or phase classification is implemented.",
+            version="2.0.1",
         )
 
         class TaskRequest(BaseModel):
@@ -33,7 +33,7 @@ def create_app():
 
         @app.get("/health")
         def health():
-            return {"status": "HEALTHY", "system": "surgical-video-phase-recognition", "domain": "Surgical AI", "version": "2.0.0-FRONTIER"}
+            return {"status": "HEALTHY", "system": "surgical-video-phase-recognition", "domain": "rule-based demo", "version": "2.0.1"}
 
         @app.post("/api/audit")
         def api_audit(req: TaskRequest):

@@ -1,7 +1,7 @@
 """
 Data Models & Telemetry Definitions for SurgiPhase-AI: Laparoscopic Video Action & Tool Segmentation Agent.
 Domain: Surgical AI
-Standard: Cholec80 / EndoVis Surgical AI Standards
+Standard: demonstration rules (not clinical standards)
 """
 import datetime
 from dataclasses import dataclass, field
@@ -35,7 +35,7 @@ class AgentTelemetryAlert:
     summary: str
     technical_details: str
     actionable_remediation: str
-    standard_reference: str = "Cholec80 / EndoVis Surgical AI Standards"
+    standard_reference: str = "demonstration rules (not clinical standards)"
     timestamp: str = field(default_factory=lambda: datetime.datetime.now(datetime.timezone.utc).isoformat())
 
     def to_dict(self) -> Dict[str, Any]:

@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Surgical Video Phase Recognition API",
-    "description": "Enterprise Distributed Component Platform (Clinical & Cryptographic AI) adhering to CAP / CLSI / NIST Standards.",
-    "version": "3.0.0-ENTERPRISE",
+    "description": "Deterministic evaluation API for numeric task payloads. No surgical video or clinical inference.",
+    "version": "2.0.1",
     "contact": {
       "name": "Dr. Abu Suraih Sakhri",
       "url": "https://github.com/abusuraihsakhri"
@@ -15,7 +15,7 @@
         "summary": "Health and metadata check",
         "responses": {
           "200": {
-            "description": "System optimal"
+            "description": "Service process responds"
           }
         }
       }
@@ -32,7 +32,7 @@
     },
     "/api/audit": {
       "post": {
-        "summary": "Dispatch task payload across specialized workers",
+        "summary": "Evaluate demonstration rules and record signed audit metadata",
         "requestBody": {
           "content": {
             "application/json": {
@@ -69,14 +69,14 @@
         },
         "responses": {
           "200": {
-            "description": "Consensus dossier with HMAC signature"
+            "description": "Rule-evaluation dossier with an in-memory HMAC audit hash"
           }
         }
       }
     },
     "/api/chat": {
       "post": {
-        "summary": "Air-gapped supervisory conversational assistant",
+        "summary": "Deterministic supervisory placeholder response",
         "requestBody": {
           "content": {
             "application/json": {
@@ -103,10 +103,13 @@
     },
     "/api/audit/logs": {
       "get": {
-        "summary": "Retrieve and cryptographically verify HMAC audit trail",
+        "summary": "Read audit metadata (requires Bearer token from AUDIT_LOGS_TOKEN)",
         "responses": {
           "200": {
             "description": "Cryptographic audit trail"
+          },
+          "403": {
+            "description": "No access token configured or request unauthorized"
           }
         }
       }
