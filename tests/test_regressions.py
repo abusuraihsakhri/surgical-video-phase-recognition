@@ -76,3 +76,19 @@ def test_console_served_at_root():
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
     assert "Browser-only" in response.text
+
+
+def test_phi_block_metric_is_incremented():
+    from agents.metrics import GLOBAL_METRICS
+    from agents.base import PHIGuard
+    before = GLOBAL_METRICS.phi_blocks_total
+    with pytest.raises(SecurityException):
+        PHIGuard.assert_no_phi("MRN-994827")
+    assert GLOBAL_METRICS.phi_blocks_total == before + 1
+
+
+def test_legacy_metadata_does_not_claim_video_inference():
+    from surgiphase_agent.server import create_app
+    response = TestClient(create_app()).get("/health")
+    assert response.status_code == 200
+    assert response.json()["domain"] == "rule-based demo"

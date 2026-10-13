@@ -34,6 +34,8 @@ def assert_no_phi(text: str) -> None:
         return
     for pattern in PHI_PATTERNS:
         if pattern.search(str(text)):
+            from .metrics import GLOBAL_METRICS
+            GLOBAL_METRICS.record_phi_block()
             raise SecurityException(f"PHI Outbound Guard Violation: Sensitive identifier detected with pattern {pattern.pattern}")
 
 
