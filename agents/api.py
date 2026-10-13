@@ -16,8 +16,8 @@ supervisor = SystemSupervisor(model_provider="mock")
 
 app = FastAPI(
     title="Surgical Video Phase Recognition API",
-    description="Enterprise Distributed Component Platform (Clinical & Biomedical AI)",
-    version="3.0.0-ENTERPRISE",
+    description="Deterministic rule-based task evaluation prototype; no video analysis or clinical validation.",
+    version="2.0.1",
 )
 
 
@@ -32,7 +32,7 @@ def console():
 
 @app.get("/health")
 def health():
-    return {"status": "HEALTHY", "service": "surgical-video-phase-recognition", "domain": "Clinical & Biomedical AI", "standard": "CAP / CLSI / ISO Standards", "version": "3.0.0-ENTERPRISE"}
+    return {"status": "HEALTHY", "service": "surgical-video-phase-recognition", "domain": "rule-based evaluation prototype", "standard": "demonstration rules only", "version": "2.0.1"}
 
 
 @app.get("/metrics")
